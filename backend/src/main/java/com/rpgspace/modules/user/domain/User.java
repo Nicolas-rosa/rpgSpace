@@ -45,6 +45,9 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(nullable = false)
+    private long tokenVersion;
+
     public static User create(String username, String email, String password) {
         User user = new User();
         user.username = username;
@@ -53,6 +56,14 @@ public class User {
         user.enabled = true;
         user.role = Role.USER;
         return user;
+    }
+
+    public long getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void invalidateTokens() {
+        tokenVersion++;
     }
 
     @PrePersist

@@ -15,31 +15,43 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class JwtService {
 
+    public static final String TYPE_ACCESS = "access";
+    public static final String TYPE_REFRESH = "refresh";
+
     private final JwtProperties jwtProperties;
 
-    public String generate(User user) {
+    public String generateAccessToken(User user) {
+        return buildToken(user, TYPE_ACCESS, jwtProperties.accessExpiration());
+    }
+
+    public String generateRefreshToken(User user, long ttlMillis) {
+        return buildToken(user, TYPE_REFRESH, ttlMillis);
+    }
+
+    public Claims parse(String token) {
+        return Jwts.parser().verifyWith(signingKey()).build().parseSignedClaims(token).getPayload();
+    }
+
+    public String extractSubject(String token) {
+        return parse(token).getSubject();
+    }
+
+    public long getAccessExpiration() {
+        return jwtProperties.accessExpiration();
+    }
+
+    private String buildToken(User user, String type, long ttlMillis) {
         Date issuedAt = new Date();
-        Date expiresAt = new Date(issuedAt.getTime() + jwtProperties.expiration());
+        Date expiresAt = new Date(issuedAt.getTime() + ttlMillis);
 
         return Jwts.builder()
                 .subject(user.getEmail())
-                .claim("role", user.getRole().name())
+                .claim("type", type)
+                .claim("ver", user.getTokenVersion())
                 .issuedAt(issuedAt)
                 .expiration(expiresAt)
                 .signWith(signingKey())
                 .compact();
-    }
-
-    public String extractSubject(String token) {
-        return claims(token).getSubject();
-    }
-
-    public long getExpiration() {
-        return jwtProperties.expiration();
-    }
-
-    private Claims claims(String token) {
-        return Jwts.parser().verifyWith(signingKey()).build().parseSignedClaims(token).getPayload();
     }
 
     private SecretKey signingKey() {

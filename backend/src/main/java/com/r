@@ -1,0 +1,89 @@
+package com.rpgspace.modules.auth.application;
+
+import com.rpgspace.modules.auth.domain.RefreshToken;
+import com.rpgspace.modules.auth.infrastructure.persistence.RefreshTokenRepository;
+import com.rpgspace.modules.user.domain.User;
+import com.rpgspace.shared.exception.UnauthorizedException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.HexFormat;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class RefreshTokenService {
+
+    private static final int TOKEN_BYTES = 32;
+
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    @Transactional
+    public String issue(User user, long ttlMillis) {
+        String rawToken = generateRawToken();
+        refreshTokenRepository.save(RefreshToken.create(
+                sha256(rawToken),
+                user,
+                Instant.now().plusMillis(ttlMillis)
+        ));
+        return rawToken;
+    }
+
+    @Transactional
+    public String rotate(String rawToken, User user, long ttlMillis) {
+        RefreshToken stored = requireValid(rawToken);
+        if (!stored.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedException("Sessão inválida.");
+        }
+        stored.revoke();
+        return issue(user, ttlMillis);
+    }
+
+    @Transactional
+    public void revoke(String rawToken) {
+        requireValid(rawToken).revoke();
+    }
+
+    @Transactional(readOnly = true)
+    public User requireUserFor(String rawToken) {
+        return requireValid(rawToken).getUser();
+    }
+
+    @Transactional
+    public void cleanup() {
+        refreshTokenRepository.deleteExpiredAndRevoked(Instant.now());
+    }
+
+    private RefreshToken requireValid(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) {
+            throw new UnauthorizedException("Sessão inválida.");
+        }
+        RefreshToken stored = refreshTokenRepository
+                .findByTokenHashAndRevokedFalse(sha256(rawToken))
+                .orElseThrow(() -> new UnauthorizedException("Sessão inválida."));
+        if (stored.getExpiresAt().isBefore(Instant.now())) {
+            throw new UnauthorizedException("Sessão expirada.");
+        }
+        return stored;
+    }
+
+    private String generateRawToken() {
+        byte[] bytes = new byte[TOKEN_BYTES];
+        new SecureRandom().nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    private String sha256(String value) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 não disponível.", exception);
+        }
+    }
+}

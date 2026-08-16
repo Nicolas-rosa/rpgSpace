@@ -8,3 +8,5 @@ app:
   security:
     jwt:
       secret: ${JWT_SECRET:cnBnc3BhY2UtZGV2ZWxvcG1lbnQtc2VjcmV0LWtleS1tdXN0LWJlLWF0LWxlYXN0LTMyLWJ5dGVz}
+      access-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+      refresh-expiration: ${JWT_REFRESH_EXPIRATION:2592000000}
