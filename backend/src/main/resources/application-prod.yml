@@ -8,3 +8,8 @@ logging:
   level:
     root: WARN
     com.rpgspace: INFO
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET}

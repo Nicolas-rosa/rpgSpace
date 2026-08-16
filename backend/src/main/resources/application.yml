@@ -40,3 +40,8 @@ logging:
     com.rpgspace: INFO
     org.hibernate.SQL: OFF
     org.hibernate.orm.jdbc.bind: OFF
+
+app:
+  security:
+    jwt:
+      expiration: ${JWT_EXPIRATION:900000}

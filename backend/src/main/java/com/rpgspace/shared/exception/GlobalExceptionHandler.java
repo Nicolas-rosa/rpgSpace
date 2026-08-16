@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -69,6 +70,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ApiError> handleUnreadableBody(HttpServletRequest request) {
         return error(HttpStatus.BAD_REQUEST, "Request body is invalid.", request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ApiError> handleDataIntegrityViolation(HttpServletRequest request) {
+        return error(HttpStatus.BAD_REQUEST, "O recurso informado já existe.", request);
     }
 
     @ExceptionHandler(BusinessException.class)

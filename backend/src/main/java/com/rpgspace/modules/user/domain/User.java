@@ -45,6 +45,16 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    public static User create(String username, String email, String password) {
+        User user = new User();
+        user.username = username;
+        user.email = email;
+        user.password = password;
+        user.enabled = true;
+        user.role = Role.USER;
+        return user;
+    }
+
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
