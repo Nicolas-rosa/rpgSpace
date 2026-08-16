@@ -1,13 +1,13 @@
-package com.rpgspace.backend;
+package com.rpgspace;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BackendApplication {
+public class RpgSpaceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BackendApplication.class, args);
+		SpringApplication.run(RpgSpaceApplication.class, args);
 	}
 
 }
