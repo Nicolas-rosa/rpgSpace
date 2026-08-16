@@ -1,0 +1,14 @@
+package com.rpgspace.shared.response;
+
+import java.time.Instant;
+
+public record ApiResponse<T>(Instant timestamp, boolean success, String message, T data) {
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(Instant.now(), true, null, data);
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>(Instant.now(), true, message, data);
+    }
+}

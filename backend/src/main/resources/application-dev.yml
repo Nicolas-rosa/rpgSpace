@@ -3,11 +3,3 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/rpgspace}
     username: ${DATABASE_USERNAME:rpgspace}
     password: ${DATABASE_PASSWORD:rpgspace}
-  jpa:
-    properties:
-      hibernate:
-        format_sql: true
-
-logging:
-  level:
-    org.hibernate.SQL: DEBUG

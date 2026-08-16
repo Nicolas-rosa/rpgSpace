@@ -1,0 +1,30 @@
+name: rpgspace
+
+services:
+  postgres:
+    image: postgres:18.4-alpine3.24
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rpgspace}
+      POSTGRES_USER: ${DATABASE_USERNAME:-rpgspace}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-rpgspace}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - rpgspace_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - rpgspace-network
+    restart: unless-stopped
+
+volumes:
+  rpgspace_postgres_data:
+
+networks:
+  rpgspace-network:
+    driver: bridge
