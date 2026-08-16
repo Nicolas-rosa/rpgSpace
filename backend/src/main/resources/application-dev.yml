@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/rpgspace}
+    username: ${DATABASE_USERNAME:rpgspace}
+    password: ${DATABASE_PASSWORD:rpgspace}
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:cnBnc3BhY2UtZGV2ZWxvcG1lbnQtc2VjcmV0LWtleS1tdXN0LWJlLWF0LWxlYXN0LTMyLWJ5dGVz}
