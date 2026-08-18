@@ -2,6 +2,7 @@ package com.rpgspace.modules.auth.api;
 
 import com.rpgspace.modules.auth.api.dto.AuthResponse;
 import com.rpgspace.modules.auth.api.dto.LoginRequest;
+import com.rpgspace.modules.auth.api.dto.RefreshTokenRequest;
 import com.rpgspace.modules.auth.api.dto.RegisterRequest;
 import com.rpgspace.modules.auth.api.dto.UserResponse;
 import com.rpgspace.modules.auth.application.AuthService;
@@ -33,6 +34,17 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ApiResponse.success(authService.refresh(request));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody(required = false) RefreshTokenRequest request) {
+        authService.logout(request == null ? null : request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
